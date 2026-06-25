@@ -3,6 +3,22 @@ function initSongs() {
     songs: [], 
     albums: [],
     searchQuery: '',
+    selectedSong: null,
+    modalInstance: null,
+
+    openModal(piste) {
+      this.selectedSong = piste;
+      if (!this.modalInstance) {
+        this.modalInstance = new bootstrap.Modal(document.getElementById('modalDetails'));
+      }
+      this.modalInstance.show();
+    },
+
+    formatDuration(ms) {
+      const minutes = Math.floor(ms / 60000);
+      const seconds = ((ms % 60000) / 1000).toFixed(0);
+      return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+    },
 
     get filteredSongs() {
       if (this.searchQuery === '') {
