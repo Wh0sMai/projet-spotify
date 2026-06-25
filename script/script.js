@@ -1,7 +1,20 @@
 function initSongs() {
   return {
     songs: [], 
+    albums: [],
+    searchQuery: '',
 
+    get filteredSongs() {
+      if (this.searchQuery === '') {
+        return this.songs;
+      }
+      const query = this.searchQuery.toLowerCase();
+      return this.songs.filter(piste => {
+        return piste.name.toLowerCase().includes(query) ||
+               piste.artists[0].name.toLowerCase().includes(query) ||
+               piste.album.name.toLowerCase().includes(query);
+      });
+    },
     async loadSongs() {
       try {
         const reponse = await fetch('data.json');
@@ -15,10 +28,33 @@ function initSongs() {
         
         this.genererGraphiqueArtistes();
         this.genererGraphiqueGenres();
+        this.extraireAlbumsPopulaires();
 
       } catch (erreur) {
-        console.error("Erreur :", erreur);
+        console.error(erreur);
       }
+    },
+
+    formaterDate(dateString) {
+      if (!dateString) return '';
+      if (dateString.length === 4) return dateString;
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    },
+
+    extraireAlbumsPopulaires() {
+      const mapAlbums = new Map();
+
+      this.songs.forEach(piste => {
+        const album = piste.album;
+        if (!mapAlbums.has(album.id)) {
+          mapAlbums.set(album.id, album);
+        }
+      });
+
+      this.albums = Array.from(mapAlbums.values())
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 12);
     },
 
     genererGraphiqueArtistes() {
